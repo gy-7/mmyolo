@@ -5,9 +5,17 @@ from .csp_resnet import PPYOLOECSPResNet
 from .cspnext import CSPNeXt
 from .efficient_rep import YOLOv6CSPBep, YOLOv6EfficientRep
 from .yolov7_backbone import YOLOv7Backbone
+from .yolov9_backbone import YOLOv9Backbone
 
 __all__ = [
-    'YOLOv5CSPDarknet', 'BaseBackbone', 'YOLOv6EfficientRep', 'YOLOv6CSPBep',
-    'YOLOXCSPDarknet', 'CSPNeXt', 'YOLOv7Backbone', 'PPYOLOECSPResNet',
-    'YOLOv8CSPDarknet'
+    'YOLOv5CSPDarknet',
+    'BaseBackbone',
+    'YOLOv6EfficientRep',
+    'YOLOv6CSPBep',
+    'YOLOXCSPDarknet',
+    'CSPNeXt',
+    'YOLOv7Backbone',
+    'PPYOLOECSPResNet',
+    'YOLOv8CSPDarknet',
+    'YOLOv9Backbone',
 ]

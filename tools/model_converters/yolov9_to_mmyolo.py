@@ -39,7 +39,7 @@ def convert(src, dst):
         blobs = yolov9_model.state_dict()
     except ModuleNotFoundError:
         raise RuntimeError(
-            'This script must be placed under the yolov9 repo,'
+            'This script must be placed under the ultralytics repo,'
             ' because loading the official pretrained model need'
             ' `model.py` to build model.'
             'Also need to install hydra-core>=1.2.0 and thop>=0.1.1')
@@ -69,6 +69,13 @@ def convert(src, dst):
             new_key = new_key.replace('.cv3.', '.conv3.')
             new_key = new_key.replace('.cv4.', '.conv4.')
             new_key = new_key.replace('.cv5.', '.conv5.')
+        if '.conv1.conv' in new_key:
+            new_key = new_key.replace('.conv1.conv1', '.conv1.rbr_dense')
+            new_key = new_key.replace('.conv1.conv2', '.conv1.rbr_1x1')
+        if '.reduce_layers.2.conv5' in new_key:
+            new_key = new_key.replace('.reduce_layers.2.conv5',
+                                      '.reduce_layers.2.conv2')
+
         if new_key in (
                 'bbox_head.head_module.dfl.conv.weight',
                 'bbox_head.head_module.dfl2.conv.weight',

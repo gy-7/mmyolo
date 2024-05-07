@@ -6,7 +6,7 @@ from mmcv.cnn import ConvModule
 from mmdet.utils import ConfigType, OptMultiConfig
 
 from mmyolo.registry import MODELS
-from ..layers import SPPELAN, ADown
+from ..layers import ADown, SPPFBottleneck
 from .base_yolo_neck import BaseYOLONeck
 
 
@@ -60,10 +60,9 @@ class YOLOv9PAFPN(BaseYOLONeck):
             nn.Module: The reduce layer.
         """
         if idx == len(self.in_channels) - 1:
-            layer = SPPELAN(
+            layer = SPPFBottleneck(
                 in_channels=self.in_channels[idx],
                 out_channels=self.in_channels[idx],
-                mid_channels=self.in_channels[idx] // 2,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg,
             )

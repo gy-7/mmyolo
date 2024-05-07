@@ -4,7 +4,6 @@ from typing import List, Optional, Sequence, Tuple, Union
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from mmcv.cnn import (ConvModule, DepthwiseSeparableConvModule, MaxPool2d,
                       build_norm_layer)
 from mmdet.models.layers.csp_layer import \
@@ -477,17 +476,21 @@ class BottleRep(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
+        middle_ratio: float = 1,
         block_cfg: ConfigType = dict(type='RepVGGBlock'),
+        conv2_cfg: ConfigType = None,
         adaptive_weight: bool = False,
     ):
         super().__init__()
         conv1_cfg = block_cfg.copy()
-        conv2_cfg = block_cfg.copy()
+        if conv2_cfg is None:
+            conv2_cfg = block_cfg.copy()
+        middle_channels = int(out_channels * middle_ratio)  # hidden channels
 
         conv1_cfg.update(
-            dict(in_channels=in_channels, out_channels=out_channels))
+            dict(in_channels=in_channels, out_channels=middle_channels))
         conv2_cfg.update(
-            dict(in_channels=out_channels, out_channels=out_channels))
+            dict(in_channels=middle_channels, out_channels=out_channels))
 
         self.conv1 = MODELS.build(conv1_cfg)
         self.conv2 = MODELS.build(conv2_cfg)
@@ -1825,179 +1828,6 @@ This code is based on https://github.com/WongKinYiu/yolov9
 """
 
 
-class RepConvN(BaseModule):
-    """RepConv is a basic rep-style block, including training and deploy status
-    This code is based on
-    https://github.com/DingXiaoH/RepVGG/blob/main/repvgg.py."""
-
-    default_act = nn.SiLU()  # default activation
-
-    def __init__(
-            self,
-            c1,
-            c2,
-            k=3,
-            s=1,
-            p=1,
-            g=1,
-            d=1,
-            bn=False,
-            deploy=False,
-            norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
-            act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):
-        super().__init__()
-        assert k == 3 and p == 1
-        self.g = g
-        self.c1 = c1
-        self.c2 = c2
-
-        self.bn = None
-        self.act = MODELS.build(act_cfg)
-        self.conv1 = ConvModule(
-            c1, c2, k, s, padding=p, groups=g, norm_cfg=norm_cfg, act_cfg=None)
-        self.conv2 = ConvModule(
-            c1,
-            c2,
-            1,
-            s,
-            padding=(p - k // 2),
-            groups=g,
-            norm_cfg=norm_cfg,
-            act_cfg=None)
-
-    def forward_fuse(self, x):
-        """Forward process."""
-        return self.act(self.conv(x))
-
-    def forward(self, x):
-        """Forward process."""
-        id_out = 0 if self.bn is None else self.bn(x)
-        return self.act(self.conv1(x) + self.conv2(x) + id_out)
-
-    def get_equivalent_kernel_bias(self):
-        kernel3x3, bias3x3 = self._fuse_bn_tensor(self.conv1)
-        kernel1x1, bias1x1 = self._fuse_bn_tensor(self.conv2)
-        kernelid, biasid = self._fuse_bn_tensor(self.bn)
-        return kernel3x3 + self._pad_1x1_to_3x3_tensor(
-            kernel1x1) + kernelid, bias3x3 + bias1x1 + biasid
-
-    def _avg_to_3x3_tensor(self, avgp):
-        channels = self.c1
-        groups = self.g
-        kernel_size = avgp.kernel_size
-        input_dim = channels // groups
-        k = torch.zeros((channels, input_dim, kernel_size, kernel_size))
-        k[np.arange(channels),
-          np.tile(np.arange(input_dim), groups), :, :] = 1.0 / kernel_size**2
-        return k
-
-    def _pad_1x1_to_3x3_tensor(self, kernel1x1):
-        if kernel1x1 is None:
-            return 0
-        else:
-            return torch.nn.functional.pad(kernel1x1, [1, 1, 1, 1])
-
-    def _fuse_bn_tensor(self, branch):
-        if branch is None:
-            return 0, 0
-        if isinstance(branch, ConvModule):
-            kernel = branch.conv.weight
-            running_mean = branch.bn.running_mean
-            running_var = branch.bn.running_var
-            gamma = branch.bn.weight
-            beta = branch.bn.bias
-            eps = branch.bn.eps
-        elif isinstance(branch, nn.BatchNorm2d):
-            if not hasattr(self, 'id_tensor'):
-                input_dim = self.c1 // self.g
-                kernel_value = np.zeros((self.c1, input_dim, 3, 3),
-                                        dtype=np.float32)
-                for i in range(self.c1):
-                    kernel_value[i, i % input_dim, 1, 1] = 1
-                self.id_tensor = torch.from_numpy(kernel_value).to(
-                    branch.weight.device)
-            kernel = self.id_tensor
-            running_mean = branch.running_mean
-            running_var = branch.running_var
-            gamma = branch.weight
-            beta = branch.bias
-            eps = branch.eps
-        std = (running_var + eps).sqrt()
-        t = (gamma / std).reshape(-1, 1, 1, 1)
-        return kernel * t, beta - running_mean * gamma / std
-
-    def fuse_convs(self):
-        if hasattr(self, 'conv'):
-            return
-        kernel, bias = self.get_equivalent_kernel_bias()
-        self.conv = nn.Conv2d(
-            in_channels=self.conv1.conv.in_channels,
-            out_channels=self.conv1.conv.out_channels,
-            kernel_size=self.conv1.conv.kernel_size,
-            stride=self.conv1.conv.stride,
-            padding=self.conv1.conv.padding,
-            dilation=self.conv1.conv.dilation,
-            groups=self.conv1.conv.groups,
-            bias=True,
-        ).requires_grad_(False)
-        self.conv.weight.data = kernel
-        self.conv.bias.data = bias
-        for para in self.parameters():
-            para.detach_()
-        self.__delattr__('conv1')
-        self.__delattr__('conv2')
-        if hasattr(self, 'nm'):
-            self.__delattr__('nm')
-        if hasattr(self, 'bn'):
-            self.__delattr__('bn')
-        if hasattr(self, 'id_tensor'):
-            self.__delattr__('id_tensor')
-
-
-class RepNBottleneck(BaseModule):
-    # Standard bottleneck
-    def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            middle_ratio: float = 0.5,
-            shortcut: bool = True,
-            kernal_sizes: Union[dict, List[dict]] = (3, 3),
-            groups: int = 1,
-            norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
-            act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):
-        super().__init__()
-        middle_channels = int(out_channels * middle_ratio)  # hidden channels
-        # self.conv1 = RepVGGBlock(
-        self.conv1 = RepConvN(
-            in_channels,
-            middle_channels,
-            kernal_sizes[0],
-            1,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-        )
-        self.conv2 = ConvModule(
-            middle_channels,
-            out_channels,
-            kernal_sizes[1],
-            1,
-            padding=1,
-            groups=groups,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-        )
-        self.shortcut = shortcut and in_channels == out_channels
-
-    def forward(self, x):
-        if self.shortcut:
-            return x + self.conv2(self.conv1(x))
-        else:
-            return self.conv2(self.conv1(x))
-
-
 class RepNCSP(BaseModule):
     # CSP Bottleneck with 3 convolutions
     def __init__(
@@ -2006,11 +1836,10 @@ class RepNCSP(BaseModule):
         out_channels: int,
         num_blocks=1,
         expand_ratio: float = 0.5,
-        shortcut=True,
         groups: int = 1,
         norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
         act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):  # ch_in, ch_out, number, shortcut, groups, expansion
+    ):  # ch_in, ch_out, number, groups, expansion
         super().__init__()
         mid_channels = int(out_channels * expand_ratio)  # hidden channels
         self.conv1 = ConvModule(
@@ -2036,15 +1865,25 @@ class RepNCSP(BaseModule):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
         )
-        self.block = nn.Sequential(*(RepNBottleneck(
-            mid_channels,
-            mid_channels,
-            shortcut=shortcut,
-            middle_ratio=1.0,
+        block_cfg = dict(
+            type='RepVGGBlock',
+            groups=groups,
+            use_bn_first=False,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        conv2_cfg = dict(
+            type='ConvModule',
+            kernel_size=3,
+            padding=1,
             groups=groups,
             norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-        ) for _ in range(num_blocks)))
+            act_cfg=act_cfg)
+        self.block = nn.Sequential(*(BottleRep(
+            mid_channels,
+            mid_channels,
+            middle_ratio=1.0,
+            block_cfg=block_cfg,
+            conv2_cfg=conv2_cfg) for _ in range(num_blocks)))
 
     def forward(self, x):
         return self.conv3(
@@ -2161,53 +2000,6 @@ class ADown(BaseModule):
         return torch.cat((x1, x2), 1)
 
 
-class SPPELAN(BaseModule):
-    # spp-elan
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        mid_channels,
-        kernel_sizes: Union[int, Sequence[int]] = 5,
-        norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
-        act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):  # ch_in, ch_out, number, shortcut, groups, expansion
-        super().__init__()
-        self.conv1 = ConvModule(
-            in_channels,
-            mid_channels,
-            1,
-            1,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg)
-
-        if isinstance(kernel_sizes, int):
-            self.poolings = nn.ModuleList([
-                nn.MaxPool2d(
-                    kernel_size=kernel_sizes,
-                    stride=1,
-                    padding=kernel_sizes // 2) for _ in range(3)
-            ])
-        else:
-            self.poolings = nn.ModuleList([
-                nn.MaxPool2d(kernel_size=ks, stride=1, padding=ks // 2)
-                for ks in kernel_sizes
-            ])
-
-        self.conv5 = ConvModule(
-            4 * mid_channels,
-            out_channels,
-            1,
-            1,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg)
-
-    def forward(self, x):
-        y = [self.conv1(x)]
-        y.extend(m(y[-1]) for m in self.poolings)
-        return self.conv5(torch.cat(y, 1))
-
-
 def autopad(k, p=None, d=1):  # kernel, padding, dilation
     # Pad to 'same' shape outputs
     if d > 1:
@@ -2217,51 +2009,3 @@ def autopad(k, p=None, d=1):  # kernel, padding, dilation
     if p is None:
         p = k // 2 if isinstance(k, int) else [x // 2 for x in k]  # auto-pad
     return p
-
-
-class CBLinear(BaseModule):
-
-    def __init__(
-        self,
-        conv1,
-        conv2s,
-        k=1,
-        s=1,
-        p=None,
-        g=1,
-        norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
-        act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):  # ch_in, ch_outs, kernel, stride, padding, groups
-        super().__init__()
-        self.conv2s = conv2s
-        self.conv = nn.Conv2d(
-            conv1,
-            sum(conv2s),
-            k,
-            s,
-            autopad(k, p),
-            groups=g,
-            bias=True,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-        )
-
-    def forward(self, x):
-        outs = self.conv(x).split(self.conv2s, dim=1)
-        return outs
-
-
-class CBFuse(BaseModule):
-
-    def __init__(self, idx):
-        super().__init__()
-        self.idx = idx
-
-    def forward(self, xs):
-        target_size = xs[-1].shape[2:]
-        res = [
-            F.interpolate(x[self.idx[i]], size=target_size, mode='nearest')
-            for i, x in enumerate(xs[:-1])
-        ]
-        out = torch.sum(torch.stack(res + xs[-1:]), dim=0)
-        return out

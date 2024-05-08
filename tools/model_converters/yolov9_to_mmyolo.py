@@ -39,7 +39,7 @@ def convert(src, dst):
         blobs = yolov9_model.state_dict()
     except ModuleNotFoundError:
         raise RuntimeError(
-            'This script must be placed under the ultralytics repo,'
+            'This script must be placed under the yolov9 repo,'
             ' because loading the official pretrained model need'
             ' `model.py` to build model.'
             'Also need to install hydra-core>=1.2.0 and thop>=0.1.1')

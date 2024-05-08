@@ -4,12 +4,14 @@ _base_ = '../_base_/default_runtime.py'
 model_test_cfg = dict(
     multi_label=False,
     nms_pre=30000,
-    # score_thr=0.25,  # inf
-    # nms=dict(type='nms', iou_threshold=0.45),  # inf
-    # max_per_img=1000,  # inf
-    score_thr=0.001,  # val
-    nms=dict(type='nms', iou_threshold=0.7),  # val
-    max_per_img=300,  # val
+    # -----inf-----
+    # score_thr=0.25,
+    # nms=dict(type='nms', iou_threshold=0.45),
+    # max_per_img=1000,
+    # -----val-----
+    score_thr=0.001,
+    nms=dict(type='nms', iou_threshold=0.7),
+    max_per_img=300,
 )
 
 # -----data related-----
@@ -21,7 +23,7 @@ val_batch_size_per_gpu = 32
 val_num_workers = 8
 persistent_workers = True
 val_ann_file = 'annotations/instances_val2017.json'
-val_data_prefix = 'val2017/'  # Prefix of val image path
+val_data_prefix = 'val2017/'
 batch_shapes_cfg = None
 
 # -----model related-----
@@ -48,6 +50,8 @@ model = dict(
         type='YOLOv9PAFPN',
         in_channels=[512, 512, 512],
         out_channels=[256, 512, 512],
+        down_module='ADown',
+        upsample_feats_cat_first=True,
         norm_cfg=norm_cfg,
         act_cfg=act_cfg,
     ),

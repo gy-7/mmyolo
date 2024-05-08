@@ -13,11 +13,11 @@ from .base_backbone import BaseBackbone
 @MODELS.register_module()
 class YOLOv9Backbone(BaseBackbone):
     arch_settings = {
-        'c': [
-            [128, 256, 128, 64, 1],
-            [256, 512, 256, 128, 1],
-            [512, 512, 512, 256, 1],
-            [512, 512, 512, 256, 1],
+        'c': [  # c1,c2,c3,num_blocks
+            [128, 256, 128, 1],
+            [256, 512, 256, 1],
+            [512, 512, 512, 1],
+            [512, 512, 512, 1],
         ],
     }
 
@@ -76,21 +76,20 @@ class YOLOv9Backbone(BaseBackbone):
         return stem
 
     def build_stage_layer(self, stage_idx: int, setting: list) -> list:
-        c1, c2, c3, c4, num_blocks = setting
+        in_channels, out_channels, mid_channels, num_blocks = setting
         stage = []
         stage.append(
             RepNCSPELAN4(
-                in_channels=c1,
-                out_channels=c2,
-                mid_channels1=c3,
-                mid_channels2=c4,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                mid_channels=mid_channels,
                 num_blocks=num_blocks,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg,
             ))
         if stage_idx != 0:
-            # if stage_idx != (len(self.arch) - 1):
-            downsample_layer = self._build_downsample_layer(c1, c1)
+            downsample_layer = self._build_downsample_layer(
+                in_channels, in_channels)
             stage.insert(0, downsample_layer)
         return stage
 
@@ -105,11 +104,14 @@ class YOLOv9Backbone(BaseBackbone):
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg,
             )
-        else:
+        elif self.down_module == 'ADown':
             downsample_layer = ADown(
                 in_channel,
                 out_channel,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg,
             )
+        else:
+            raise ValueError(
+                '`down_module` must be in ["ConvModule", "ADown"]')
         return downsample_layer

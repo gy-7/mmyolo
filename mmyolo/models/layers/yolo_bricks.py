@@ -1831,15 +1831,15 @@ This code is based on https://github.com/WongKinYiu/yolov9
 class RepNCSP(BaseModule):
     # CSP Bottleneck with 3 convolutions
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        num_blocks=1,
-        expand_ratio: float = 0.5,
-        groups: int = 1,
-        norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
-        act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):  # ch_in, ch_out, number, groups, expansion
+            self,
+            in_channels: int,
+            out_channels: int,
+            num_blocks=1,
+            expand_ratio: float = 0.5,
+            groups: int = 1,
+            norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
+            act_cfg: ConfigType = dict(type='SiLU', inplace=True),
+    ):
         super().__init__()
         mid_channels = int(out_channels * expand_ratio)  # hidden channels
         self.conv1 = ConvModule(
@@ -1885,43 +1885,42 @@ class RepNCSP(BaseModule):
             block_cfg=block_cfg,
             conv2_cfg=conv2_cfg) for _ in range(num_blocks)))
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         return self.conv3(
             torch.cat((self.block(self.conv1(x)), self.conv2(x)), 1))
 
 
 @MODELS.register_module()
 class RepNCSPELAN4(BaseModule):
-    # csp-elan
+
     def __init__(
         self,
         in_channels,
         out_channels,
-        mid_channels1,
-        mid_channels2,
+        mid_channels,
         num_blocks=1,
         norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
         act_cfg: ConfigType = dict(type='SiLU', inplace=True),
     ):  # ch_in, ch_out, number, shortcut, groups, expansion
         super().__init__()
-        self.split_channels = mid_channels1 // 2
+        self.split_channels = mid_channels // 2
         self.conv1 = ConvModule(
             in_channels,
-            mid_channels1,
+            mid_channels,
             1,
             1,
             norm_cfg=norm_cfg,
             act_cfg=act_cfg)
         self.conv2 = nn.Sequential(
             RepNCSP(
-                mid_channels1 // 2,
-                mid_channels2,
+                self.split_channels,
+                self.split_channels,
                 num_blocks,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg),
             ConvModule(
-                mid_channels2,
-                mid_channels2,
+                self.split_channels,
+                self.split_channels,
                 3,
                 1,
                 padding=1,
@@ -1930,14 +1929,14 @@ class RepNCSPELAN4(BaseModule):
         )
         self.conv3 = nn.Sequential(
             RepNCSP(
-                mid_channels2,
-                mid_channels2,
+                self.split_channels,
+                self.split_channels,
                 num_blocks,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg),
             ConvModule(
-                mid_channels2,
-                mid_channels2,
+                self.split_channels,
+                self.split_channels,
                 3,
                 1,
                 padding=1,
@@ -1945,19 +1944,19 @@ class RepNCSPELAN4(BaseModule):
                 act_cfg=act_cfg),
         )
         self.conv4 = ConvModule(
-            mid_channels1 + (2 * mid_channels2),
+            2 * mid_channels,
             out_channels,
             1,
             1,
             norm_cfg=norm_cfg,
             act_cfg=act_cfg)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         y = list(self.conv1(x).chunk(2, 1))
         y.extend((m(y[-1])) for m in [self.conv2, self.conv3])
         return self.conv4(torch.cat(y, 1))
 
-    def forward_split(self, x):
+    def forward_split(self, x: Tensor) -> Tensor:
         y = list(
             self.conv1(x).split((self.split_channels, self.split_channels), 1))
         y.extend(m(y[-1]) for m in [self.conv2, self.conv3])
@@ -1967,12 +1966,12 @@ class RepNCSPELAN4(BaseModule):
 class ADown(BaseModule):
 
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
-        act_cfg: ConfigType = dict(type='SiLU', inplace=True),
-    ):  # ch_in, ch_out, shortcut, kernels, groups, expand
+            self,
+            in_channels: int,
+            out_channels: int,
+            norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
+            act_cfg: ConfigType = dict(type='SiLU', inplace=True),
+    ):
         super().__init__()
         self.conv1 = ConvModule(
             in_channels // 2,
@@ -1991,21 +1990,10 @@ class ADown(BaseModule):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = torch.nn.functional.avg_pool2d(x, 2, 1, 0, False, True)
         x1, x2 = x.chunk(2, 1)
         x1 = self.conv1(x1)
         x2 = torch.nn.functional.max_pool2d(x2, 3, 2, 1)
         x2 = self.conv2(x2)
         return torch.cat((x1, x2), 1)
-
-
-def autopad(k, p=None, d=1):  # kernel, padding, dilation
-    # Pad to 'same' shape outputs
-    if d > 1:
-        k = (d * (k - 1) +
-             1 if isinstance(k, int) else [d * (x - 1) + 1
-                                           for x in k])  # actual kernel-size
-    if p is None:
-        p = k // 2 if isinstance(k, int) else [x // 2 for x in k]  # auto-pad
-    return p

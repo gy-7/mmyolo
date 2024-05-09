@@ -2,7 +2,7 @@ _base_ = '../_base_/default_runtime.py'
 
 # -----train val related-----
 model_test_cfg = dict(
-    multi_label=False,
+    multi_label=True,
     nms_pre=30000,
     # -----inf-----
     # score_thr=0.25,
@@ -19,12 +19,17 @@ dataset_type = 'YOLOv5CocoDataset'
 data_root = 'data/coco/'
 num_classes = 80
 img_scale = (640, 640)  # height, width
-val_batch_size_per_gpu = 32
-val_num_workers = 8
+val_batch_size_per_gpu = 1
+val_num_workers = 2
 persistent_workers = True
 val_ann_file = 'annotations/instances_val2017.json'
 val_data_prefix = 'val2017/'
-batch_shapes_cfg = None
+batch_shapes_cfg = dict(
+    type='BatchShapePolicy',
+    batch_size=val_batch_size_per_gpu,
+    img_size=img_scale[0],
+    size_divisor=32,
+    extra_pad_ratio=0.5)
 
 # -----model related-----
 strides = (8, 16, 32)
@@ -81,7 +86,8 @@ test_pipeline = [
         type='LetterResize',
         scale=img_scale,
         allow_scale_up=False,
-        use_mini_pad=True,
+        # use_mini_pad=True,  # inf
+        use_mini_pad=False,  # val
         pad_val=dict(img=114)),
     dict(type='LoadAnnotations', with_bbox=True, _scope_='mmdet'),
     dict(

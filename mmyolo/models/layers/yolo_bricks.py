@@ -4,6 +4,7 @@ from typing import List, Optional, Sequence, Tuple, Union
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from mmcv.cnn import (ConvModule, DepthwiseSeparableConvModule, MaxPool2d,
                       build_norm_layer)
 from mmdet.models.layers.csp_layer import \
@@ -684,8 +685,8 @@ class ELANBlock(BaseModule):
 
         middle_channels = int(in_channels * middle_ratio)
         block_channels = int(in_channels * block_ratio)
-        final_conv_in_channels = (
-            int(num_blocks * block_channels) + 2 * middle_channels)
+        final_conv_in_channels = int(
+            num_blocks * block_channels) + 2 * middle_channels
 
         self.main_conv = ConvModule(
             in_channels,
@@ -816,8 +817,8 @@ class MaxPoolAndStrideConvBlock(BaseModule):
     ):
         super().__init__(init_cfg=init_cfg)
 
-        middle_channels = (
-            in_channels if use_in_channels_of_middle else out_channels // 2)
+        middle_channels = in_channels if use_in_channels_of_middle \
+            else out_channels // 2
 
         self.maxpool_branches = nn.Sequential(
             MaxPool2d(
@@ -1997,3 +1998,60 @@ class ADown(BaseModule):
         x2 = torch.nn.functional.max_pool2d(x2, 3, 2, 1)
         x2 = self.conv2(x2)
         return torch.cat((x1, x2), 1)
+
+
+def autopad(kernel, padding=None, dilation=1):
+    # Pad to 'same' shape outputs
+    if dilation > 1:
+        if isinstance(kernel, int):
+            kernel = dilation * (kernel - 1) + 1
+        else:
+            kernel = [dilation * (x - 1) + 1 for x in kernel]
+    if padding is None:
+        if isinstance(kernel, int):
+            padding = kernel // 2
+        else:
+            padding = [x // 2 for x in kernel]
+    return padding
+
+
+class CBLinear(nn.Module):
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: Tuple[int],
+        kernel_size: Union[int, Tuple[int, int]] = 1,
+        stride: Union[int, Tuple[int, int]] = 1,
+        padding: Union[int, Tuple[int, int]] = None,
+        groups: int = 1,
+    ):
+        super().__init__()
+        self.out_channels = out_channels
+        new_padding = autopad(kernel_size, padding, stride)
+        self.conv = nn.Conv2d(
+            in_channels,
+            sum(out_channels),
+            kernel_size,
+            stride,
+            new_padding,
+            groups=groups,
+            bias=True)
+
+    def forward(self, x: torch.Tensor):
+        outs = self.conv(x).split(self.out_channels, dim=1)
+        return outs
+
+
+class CBFuse(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, xs: Sequence[torch.Tensor]):
+        target_size = xs[-1].shape[2:]
+        res = [
+            F.interpolate(x, size=target_size, mode='nearest') for x in xs[:-1]
+        ]
+        out = torch.sum(torch.stack(res + xs[-1:]), dim=0)
+        return out

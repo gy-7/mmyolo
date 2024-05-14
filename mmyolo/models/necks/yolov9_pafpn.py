@@ -18,10 +18,10 @@ class YOLOv9PAFPN(BaseYOLONeck):
         self,
         in_channels: List[int] = [512, 512, 512],
         out_channels: List[int] = [256, 512, 512],
-        block_cfg: dict = dict(type='RepNCSPELAN4'),
+        mid_channels=512,
         down_module: str = 'ADown',
-        upsample_feats_cat_first: bool = True,
-        freeze_all: bool = False,
+        sppf_mid_channels_scale=0.5,
+        block_cfg: dict = dict(type='RepNCSPELAN4'),
         norm_cfg: ConfigType = dict(type='BN', momentum=0.03, eps=0.001),
         act_cfg: ConfigType = dict(type='SiLU', inplace=True),
         init_cfg: OptMultiConfig = None,
@@ -29,14 +29,14 @@ class YOLOv9PAFPN(BaseYOLONeck):
 
         self.down_module = down_module
         self.block_cfg = block_cfg
+        self.mid_channels = mid_channels
+        self.sppf_mid_channels_scale = sppf_mid_channels_scale
         self.block_cfg.setdefault('norm_cfg', norm_cfg)
         self.block_cfg.setdefault('act_cfg', act_cfg)
 
         super().__init__(
             in_channels=in_channels,
             out_channels=out_channels,
-            upsample_feats_cat_first=upsample_feats_cat_first,
-            freeze_all=freeze_all,
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
             init_cfg=init_cfg,
@@ -54,7 +54,8 @@ class YOLOv9PAFPN(BaseYOLONeck):
         if idx == len(self.in_channels) - 1:
             layer = SPPFBottleneck(
                 in_channels=self.in_channels[idx],
-                out_channels=self.in_channels[idx],
+                out_channels=self.mid_channels,
+                mid_channels_scale=self.sppf_mid_channels_scale,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg,
             )
@@ -77,13 +78,11 @@ class YOLOv9PAFPN(BaseYOLONeck):
         """
         block_cfg = self.block_cfg.copy()
         if idx == 2:
-            block_cfg[
-                'in_channels'] = self.in_channels[1] + self.in_channels[2]
+            block_cfg['in_channels'] = self.in_channels[1] + self.mid_channels
             block_cfg['out_channels'] = self.out_channels[1]
             block_cfg['mid_channels'] = self.out_channels[1]
         else:
-            block_cfg[
-                'in_channels'] = self.in_channels[0] + self.in_channels[1]
+            block_cfg['in_channels'] = self.in_channels[0] + self.mid_channels
             block_cfg['out_channels'] = self.out_channels[0]
             block_cfg['mid_channels'] = self.out_channels[0]
         return MODELS.build(block_cfg)
@@ -128,14 +127,15 @@ class YOLOv9PAFPN(BaseYOLONeck):
             nn.Module: The bottom up layer.
         """
         block_cfg = self.block_cfg.copy()
-        if idx == 0:
-            block_cfg[
-                'in_channels'] = self.in_channels[1] + self.out_channels[0]
-        else:
-            block_cfg[
-                'in_channels'] = self.in_channels[2] + self.in_channels[1]
         block_cfg['out_channels'] = self.out_channels[1]
-        block_cfg['mid_channels'] = block_cfg['out_channels']
+        block_cfg['mid_channels'] = self.out_channels[1]
+        if idx == 0:
+            block_cfg['in_channels'] = self.mid_channels + self.out_channels[0]
+        else:
+            block_cfg['in_channels'] = self.mid_channels + self.out_channels[1]
+            if self.in_channels[-1] == 1024:  # support e model
+                block_cfg['mid_channels'] = self.out_channels[1] * 2
+
         return MODELS.build(block_cfg)
 
     def build_out_layer(self, idx: int) -> nn.Module:

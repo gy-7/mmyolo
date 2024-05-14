@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .ema import ExpMomentumEMA
-from .yolo_bricks import (ADown, BepC3StageBlock, BiFusion,
+from .yolo_bricks import (ADown, BepC3StageBlock, BiFusion, CBFuse, CBLinear,
                           CSPLayerWithTwoConv, DarknetBottleneck, EELANBlock,
                           EffectiveSELayer, ELANBlock, ImplicitA, ImplicitM,
                           MaxPoolAndStrideConvBlock, PPYOLOEBasicBlock,
@@ -13,5 +13,5 @@ __all__ = [
     'PPYOLOEBasicBlock', 'EffectiveSELayer', 'TinyDownSampleBlock',
     'EELANBlock', 'ImplicitA', 'ImplicitM', 'BepC3StageBlock',
     'CSPLayerWithTwoConv', 'DarknetBottleneck', 'BiFusion', 'RepNCSPELAN4',
-    'ADown'
+    'ADown', 'CBLinear', 'CBFuse'
 ]

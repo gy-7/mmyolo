@@ -6,9 +6,9 @@ import torch
 
 convert_dict_yolov9_c = {
     # backbone
-    'model.1': 'backbone.stem.0',
-    'model.2': 'backbone.stem.1',
-    'model.3': 'backbone.stage1.0',
+    'model.1': 'backbone.stem',
+    'model.2': 'backbone.stage1.0',
+    'model.3': 'backbone.stage1.1',
     'model.4': 'backbone.stage2.0',
     'model.5': 'backbone.stage2.1',
     'model.6': 'backbone.stage3.0',
@@ -29,10 +29,63 @@ convert_dict_yolov9_c = {
     'model.38': 'bbox_head.head_module',
 }
 
+convert_dict_yolov9_e = {
+    # backbone1
+    'model.1': 'backbone.backbone1.stem',
+    'model.2': 'backbone.backbone1.stage1.0',
+    'model.3': 'backbone.backbone1.stage1.1',
+    'model.4': 'backbone.backbone1.stage2.0',
+    'model.5': 'backbone.backbone1.stage2.1',
+    'model.6': 'backbone.backbone1.stage3.0',
+    'model.7': 'backbone.backbone1.stage3.1',
+    'model.8': 'backbone.backbone1.stage4.0',
+    'model.9': 'backbone.backbone1.stage4.1',
+    # backbone2
+    'model.10': 'backbone.cb_linears.0',
+    'model.11': 'backbone.cb_linears.1',
+    'model.12': 'backbone.cb_linears.2',
+    'model.13': 'backbone.cb_linears.3',
+    'model.14': 'backbone.cb_linears.4',
+    'model.20': 'backbone.down_modules.0',
+    'model.23': 'backbone.down_modules.1',
+    'model.26': 'backbone.down_modules.2',
+    'model.15': 'backbone.backbone2.stem',
+    'model.16': 'backbone.backbone2.stage1.0',
+    'model.17': 'backbone.backbone2.stage1.1',
+    'model.18': 'backbone.backbone2.stage2.0',
+    'model.19': 'backbone.backbone2.stage2.1',
+    'model.21': 'backbone.backbone2.stage3.0',
+    'model.22': 'backbone.backbone2.stage3.1',
+    'model.24': 'backbone.backbone2.stage4.0',
+    'model.25': 'backbone.backbone2.stage4.1',
+    'model.27': 'backbone.backbone2.stage5.0',
+    'model.28': 'backbone.backbone2.stage5.1',
+    # neck
+    'model.36': 'neck.reduce_layers.2',
+    'model.37': 'neck.upsample_layers.0',
+    'model.39': 'neck.top_down_layers.0',
+    'model.40': 'neck.upsample_layers.1',
+    'model.42': 'neck.top_down_layers.1',
+    'model.43': 'neck.downsample_layers.0',
+    'model.45': 'neck.bottom_up_layers.0',
+    'model.46': 'neck.downsample_layers.1',
+    'model.48': 'neck.bottom_up_layers.1',
+    # head
+    'model.49': 'bbox_head.head_module',
+}
+
 
 def convert(src, dst):
     """Convert keys in pretrained YOLOv9 models to mmyolo style."""
-    convert_dict = convert_dict_yolov9_c
+    print(f'Convert {src} to mmyolo style.')
+    if 'yolov9-c' in src:
+        convert_dict = convert_dict_yolov9_c
+        print('Use convert_dict_yolov9_c.')
+    elif 'yolov9-e' in src:
+        convert_dict = convert_dict_yolov9_e
+        print('Use convert_dict_yolov9_e.')
+    else:
+        raise ValueError('Only yolov9-c and yolov9-e are supported.')
 
     try:
         yolov9_model = torch.load(src)['model']

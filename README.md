@@ -1,12 +1,10 @@
-Hi everyone, I recently finished implementing YOLOv9 with mmyolo.
-https://github.com/gy-7/mmyolo/tree/gy77/support_yolov9
-The code is still in the process of being updated, so feel free to join me in improving it.
+Hi everyone, I recently finished implementing YOLOv9 with mmyolo. The code is still in the process of being updated, so feel free to join me in improving it.
 
 Currently the supported features are as follows:
 
 1. weight convert, official-yolov9 to mmyolo-yolov9 weight convert, support yolov9-s/m/c/e & yolov9-t/s-converted model. (The converted weights are in the release)
 2. inference/validation: support yolov9-t/s/m/c/e model. (accuracy verified)
-3. training: support yolov9-t/s/m/c/e model (training accuracy is not verified, as I don't have enough GPUs. 😭)
+3. training: support yolov9-t/s/m/c/e model (training accuracy is not verified, as I don't have enough GPUs.)
 4. Intuitive model architecture diagram: support yolov9-t/s/m/c/e model (coming soon)
 
 ______________________________________________________________________

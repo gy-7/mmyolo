@@ -7,8 +7,7 @@ Implementation of paper - [YOLOv9: Learning What You Want to Learn Using Program
 ...
 
 <div align="center">
-    <img src="https://github.com/WongKinYiu/yolov9/raw/main/figure/performance.png"/>
-	YOLOv9 performance
+    <img src="https://github.com/WongKinYiu/yolov9/raw/main/figure/performance.png" width=70%/>
 </div>
 
 ## Structures
@@ -19,15 +18,15 @@ TODO
 
 ### COCO
 
-| Backbone | Arch | size | Mask Refine | SyncBN | AMP | Param(M) | FLOPs(G) | box AP |                       Config                        |                                              Download                                              |
-| :------: | :--: | :--: | :---------: | :----: | :-: | :------: | :------: | :----: | :-------------------------------------------------: | :------------------------------------------------------------------------------------------------: |
-| YOLOv9-t |  P5  | 640  |     No      |  Yes   | Yes |   2.0    |   7.7    |  38.3  | [config](./yolov9_t_syncbn_fast_8xb16-500e_coco.py) |                                            model \| log                                            |
-| YOLOv9-s |  P5  | 640  |     No      |  Yes   | Yes |   7.1    |   26.4   |  46.9  | [config](./yolov9_s_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-s.pth) \| log |
-| YOLOv9-m |  P5  | 640  |     No      |  Yes   | Yes |   20.0   |   76.3   |  51.5  | [config](./yolov9_m_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-m.pth) \| log |
-| YOLOv9-c |  P5  | 640  |     No      |  Yes   | Yes |   25.3   |  102.1   |  53.1  | [config](./yolov9_c_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-c.pth) \| log |
-| YOLOv9-e |  P5  | 640  |     No      |  Yes   | Yes |   57.3   |  189.0   |  55.7  | [config](./yolov9_e_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-e.pth) \| log |
+| Backbone | Arch | size | Mask Refine | SyncBN | AMP | Param(M) | FLOPs(G) | box AP |                       Config                        |                                                   Download                                                   |
+| :------: | :--: | :--: | :---------: | :----: | :-: | :------: | :------: | :----: | :-------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
+| YOLOv9-t |  P5  | 640  |     No      |  Yes   | Yes |   2.0    |   7.7    |  38.3  | [config](./yolov9_t_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-t-converted.pth) \| log |
+| YOLOv9-s |  P5  | 640  |     No      |  Yes   | Yes |   7.1    |   26.4   |  46.9  | [config](./yolov9_s_syncbn_fast_8xb16-500e_coco.py) |      [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-s.pth) \| log      |
+| YOLOv9-m |  P5  | 640  |     No      |  Yes   | Yes |   20.0   |   76.3   |  51.5  | [config](./yolov9_m_syncbn_fast_8xb16-500e_coco.py) |      [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-m.pth) \| log      |
+| YOLOv9-c |  P5  | 640  |     No      |  Yes   | Yes |   25.3   |  102.1   |  53.1  | [config](./yolov9_c_syncbn_fast_8xb16-500e_coco.py) |      [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-c.pth) \| log      |
+| YOLOv9-e |  P5  | 640  |     No      |  Yes   | Yes |   57.3   |  189.0   |  55.7  | [config](./yolov9_e_syncbn_fast_8xb16-500e_coco.py) |      [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-e.pth) \| log      |
 
-yolov9-t:
+yolov9-t-converted:
 
 ```python
  Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.383

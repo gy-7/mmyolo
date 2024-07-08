@@ -1,3 +1,16 @@
+Hi everyone, I recently finished implementing YOLOv9 with mmyolo.
+https://github.com/gy-7/mmyolo/tree/gy77/support_yolov9
+The code is still in the process of being updated, so feel free to join me in improving it.
+
+Currently the supported features are as follows:
+
+1. weight convert, official-yolov9 to mmyolo-yolov9 weight convert, support yolov9-s/m/c/e & yolov9-t/s-converted model. (The converted weights are in the release)
+2. inference/validation: support yolov9-t/s/m/c/e model. (accuracy verified)
+3. training: support yolov9-t/s/m/c/e model (training accuracy is not verified, as I don't have enough GPUs. 😭)
+4. Intuitive model architecture diagram: support yolov9-t/s/m/c/e model (coming soon)
+
+______________________________________________________________________
+
 <div align="center">
   <img width="100%" src="https://user-images.githubusercontent.com/27466624/222385101-516e551c-49f5-480d-a135-4b24ee6dc308.png"/>
   <div>&nbsp;</div>
@@ -62,18 +75,19 @@ English | [简体中文](README_zh-CN.md)
 
 ## 📄 Table of Contents
 
-- [🥳 🚀 What's New](#--whats-new-)
-  - [✨ Highlight](#-highlight-)
-- [📖 Introduction](#-introduction-)
-- [🛠️ Installation](#%EF%B8%8F-installation-)
-- [👨‍🏫 Tutorial](#-tutorial-)
-- [📊 Overview of Benchmark and Model Zoo](#-overview-of-benchmark-and-model-zoo-)
-- [❓ FAQ](#-faq-)
-- [🙌 Contributing](#-contributing-)
-- [🤝 Acknowledgement](#-acknowledgement-)
-- [🖊️ Citation](#️-citation-)
-- [🎫 License](#-license-)
-- [🏗️ Projects in OpenMMLab](#%EF%B8%8F-projects-in-openmmlab-)
+- [📄 Table of Contents](#-table-of-contents)
+- [🥳 🚀 What's New 🔝](#--whats-new-)
+  - [✨ Highlight 🔝](#-highlight-)
+- [📖 Introduction 🔝](#-introduction-)
+- [🛠️ Installation 🔝](#️-installation-)
+- [👨‍🏫 Tutorial 🔝](#-tutorial-)
+- [📊 Overview of Benchmark and Model Zoo 🔝](#-overview-of-benchmark-and-model-zoo-)
+- [❓ FAQ 🔝](#-faq-)
+- [🙌 Contributing 🔝](#-contributing-)
+- [🤝 Acknowledgement 🔝](#-acknowledgement-)
+- [🖊️ Citation 🔝](#️-citation-)
+- [🎫 License 🔝](#-license-)
+- [🏗️ Projects in OpenMMLab 🔝](#️-projects-in-openmmlab-)
 
 ## 🥳 🚀 What's New [🔝](#-table-of-contents)
 

@@ -8,32 +8,125 @@ Implementation of paper - [YOLOv9: Learning What You Want to Learn Using Program
 
 <div align="center">
     <img src="https://github.com/WongKinYiu/yolov9/raw/main/figure/performance.png"/>
-    YOLOv9 performance
+	YOLOv9 performance
 </div>
 
-<!-- [ALGORITHM] -->
-
 ## Structures
+
+TODO
 
 ## Results and models
 
 ### COCO
 
-| Backbone | Arch | size | Mask Refine | SyncBN | AMP | Mem (GB) |   box AP    | TTA box AP |                             Config                              |                                                                                                                                                                                   Download                                                                                                                                                                                   |
-| :------: | :--: | :--: | :---------: | :----: | :-: | :------: | :---------: | :--------: | :-------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| YOLOv8-n |  P5  | 640  |     No      |  Yes   | Yes |   2.8    |    37.2     |            |       [config](./yolov8_n_syncbn_fast_8xb16-500e_coco.py)       |                         [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_n_syncbn_fast_8xb16-500e_coco/yolov8_n_syncbn_fast_8xb16-500e_coco_20230114_131804-88c11cdb.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_n_syncbn_fast_8xb16-500e_coco/yolov8_n_syncbn_fast_8xb16-500e_coco_20230114_131804.log.json)                         |
-| YOLOv8-n |  P5  | 640  |     Yes     |  Yes   | Yes |   2.5    | 37.4 (+0.2) |    39.9    | [config](./yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py) | [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco_20230216_101206-b975b1cd.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco_20230216_101206.log.json) |
-| YOLOv8-s |  P5  | 640  |     No      |  Yes   | Yes |   4.0    |    44.2     |            |       [config](./yolov8_s_syncbn_fast_8xb16-500e_coco.py)       |                         [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_s_syncbn_fast_8xb16-500e_coco/yolov8_s_syncbn_fast_8xb16-500e_coco_20230117_180101-5aa5f0f1.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_s_syncbn_fast_8xb16-500e_coco/yolov8_s_syncbn_fast_8xb16-500e_coco_20230117_180101.log.json)                         |
-| YOLOv8-s |  P5  | 640  |     Yes     |  Yes   | Yes |   4.0    | 45.1 (+0.9) |    46.8    | [config](./yolov8_s_mask-refine_syncbn_fast_8xb16-500e_coco.py) | [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_s_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_s_mask-refine_syncbn_fast_8xb16-500e_coco_20230216_095938-ce3c1b3f.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_s_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_s_mask-refine_syncbn_fast_8xb16-500e_coco_20230216_095938.log.json) |
-| YOLOv8-m |  P5  | 640  |     No      |  Yes   | Yes |   7.2    |    49.8     |            |       [config](./yolov8_m_syncbn_fast_8xb16-500e_coco.py)       |                         [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_m_syncbn_fast_8xb16-500e_coco/yolov8_m_syncbn_fast_8xb16-500e_coco_20230115_192200-c22e560a.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_m_syncbn_fast_8xb16-500e_coco/yolov8_m_syncbn_fast_8xb16-500e_coco_20230115_192200.log.json)                         |
-| YOLOv8-m |  P5  | 640  |     Yes     |  Yes   | Yes |   7.0    | 50.6 (+0.8) |    52.3    | [config](./yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco.py) | [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco_20230216_223400-f40abfcd.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco_20230216_223400.log.json) |
-| YOLOv8-l |  P5  | 640  |     No      |  Yes   | Yes |   9.8    |    52.1     |            |       [config](./yolov8_l_syncbn_fast_8xb16-500e_coco.py)       |                         [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_l_syncbn_fast_8xb16-500e_coco/yolov8_l_syncbn_fast_8xb16-500e_coco_20230217_182526-189611b6.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_l_syncbn_fast_8xb16-500e_coco/yolov8_l_syncbn_fast_8xb16-500e_coco_20230217_182526.log.json)                         |
-| YOLOv8-l |  P5  | 640  |     Yes     |  Yes   | Yes |   9.1    | 53.0 (+0.9) |    54.4    | [config](./yolov8_l_mask-refine_syncbn_fast_8xb16-500e_coco.py) | [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_l_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_l_mask-refine_syncbn_fast_8xb16-500e_coco_20230217_120100-5881dec4.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_l_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_l_mask-refine_syncbn_fast_8xb16-500e_coco_20230217_120100.log.json) |
-| YOLOv8-x |  P5  | 640  |     No      |  Yes   | Yes |   12.2   |    52.7     |            |       [config](./yolov8_x_syncbn_fast_8xb16-500e_coco.py)       |                         [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_x_syncbn_fast_8xb16-500e_coco/yolov8_x_syncbn_fast_8xb16-500e_coco_20230218_023338-5674673c.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_x_syncbn_fast_8xb16-500e_coco/yolov8_x_syncbn_fast_8xb16-500e_coco_20230218_023338.log.json)                         |
-| YOLOv8-x |  P5  | 640  |     Yes     |  Yes   | Yes |   12.4   | 54.0 (+1.3) |    55.0    | [config](./yolov8_x_mask-refine_syncbn_fast_8xb16-500e_coco.py) | [model](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_x_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_x_mask-refine_syncbn_fast_8xb16-500e_coco_20230217_120411-079ca8d1.pth) \| [log](https://download.openmmlab.com/mmyolo/v0/yolov8/yolov8_x_mask-refine_syncbn_fast_8xb16-500e_coco/yolov8_x_mask-refine_syncbn_fast_8xb16-500e_coco_20230217_120411.log.json) |
+| Backbone | Arch | size | Mask Refine | SyncBN | AMP | Param(M) | FLOPs(G) | box AP |                       Config                        |                                              Download                                              |
+| :------: | :--: | :--: | :---------: | :----: | :-: | :------: | :------: | :----: | :-------------------------------------------------: | :------------------------------------------------------------------------------------------------: |
+| YOLOv9-t |  P5  | 640  |     No      |  Yes   | Yes |   2.0    |   7.7    |  38.3  | [config](./yolov9_t_syncbn_fast_8xb16-500e_coco.py) |                                            model \| log                                            |
+| YOLOv9-s |  P5  | 640  |     No      |  Yes   | Yes |   7.1    |   26.4   |  46.9  | [config](./yolov9_s_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-s.pth) \| log |
+| YOLOv9-m |  P5  | 640  |     No      |  Yes   | Yes |   20.0   |   76.3   |  51.5  | [config](./yolov9_m_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-m.pth) \| log |
+| YOLOv9-c |  P5  | 640  |     No      |  Yes   | Yes |   25.3   |  102.1   |  53.1  | [config](./yolov9_c_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-c.pth) \| log |
+| YOLOv9-e |  P5  | 640  |     No      |  Yes   | Yes |   57.3   |  189.0   |  55.7  | [config](./yolov9_e_syncbn_fast_8xb16-500e_coco.py) | [model](https://github.com/gy-7/mmyolo/releases/download/mmyolo-yolov9/mmyolo_yolov9-e.pth) \| log |
+
+yolov9-t:
+
+```python
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.383
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.531
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.412
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.187
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.423
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.548
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.328
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.553
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.606
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.361
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.672
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.800
+```
+
+yolov9-s:
+
+```python
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.469
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.634
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.508
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.267
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.520
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.645
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.365
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.608
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.659
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.452
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.726
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.825
+```
+
+yolov9-m:
+
+```python
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.515
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.681
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.562
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.340
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.570
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.680
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.645
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.694
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.524
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.753
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.839
+```
+
+yolov9-c:
+
+```python
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.531
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.703
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.579
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.366
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.587
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.690
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.393
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.653
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.702
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.542
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.760
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.848
+ Average Recall     (AR) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.900
+```
+
+yolov9-e:
+
+```python
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.557
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.728
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.607
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.398
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.611
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.715
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.405
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.670
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.718
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.770
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.862
+```
 
 **Note**
 
-1.
+TODO
 
 ## Citation
+
+```latex
+@misc{wang2024yolov9,
+      title={YOLOv9: Learning What You Want to Learn Using Programmable Gradient Information},
+      author={Chien-Yao Wang and I-Hau Yeh and Hong-Yuan Mark Liao},
+      year={2024},
+      eprint={2402.13616},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2402.13616},
+}
+```
